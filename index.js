@@ -99,6 +99,11 @@ let projectBuildingEntry = function () {
                     articlesAddedInThisBuild.push(articleFileName_raw);
                 };
 
+                // Automate `git add`
+                articlesAddedInThisBuild.map(function (articleTitle_raw) {
+                    exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
+                });
+
                 // Last of articles
                 if (iterationCount === listOfArticles_thisBuild.length - 1) {
                     // Building reports
