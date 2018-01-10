@@ -22,21 +22,17 @@ const pkg = require('./package.json');
 //
 
 let projectInitializationEntry = function () {
+    const config = {
+        deploymentTarget: 'https://username.github.io',
+        siteName: 'Yet Another Archive',
+        masterKey: (uuidv4() + uuidv4() + uuidv4() + uuidv4() + uuidv4()).replace(/-/g, '')
+    };
+
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir;');
     exec('touch docs-index.txt; touch html/index.html;');
     exec('rm html/db/*;');
 
-    fs.writeFileSync('archiviation-config.json', JSON.stringify({
-        deploymentTarget: 'https://username.github.io',
-        siteName: 'Yet Another Archive',
-        masterKey: (uuidv4() + uuidv4() + uuidv4() + uuidv4() + uuidv4()).replace(/-/g, '')
-    }));
-    fs.writeFileSync('.gitignore', [
-        'archiviation-config.json',
-        'source-articles/*',
-        'keys/*',
-        'docs-index.txt',
-    ].join('\n'));
+    fs.writeFileSync('archiviation-config.json', JSON.stringify(config));
     fs.writeFileSync('html/robots.txt', [
         'User-agent: *',
         'Crawl-delay: 10',
@@ -45,9 +41,7 @@ let projectInitializationEntry = function () {
     fs.writeFileSync('.last-build-docs-list.json', '[]');
     fs.writeFileSync('source-articles/Example.txt', 'This is an exmaple article.');
 
-    const config = JSON.parse(fs.readFileSync('archiviation-config.json').toString());
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
-
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
 
     exec('cd html; bower install crypto-js; bower install bower install https://raw.githubusercontent.com/agnoster/base32-js/master/dist/base32.min.js;');
@@ -59,7 +53,7 @@ let projectBuildingEntry = function () {
     const config = JSON.parse(fs.readFileSync('archiviation-config.json').toString());
 
     // Rewrite default webpage template
-    // Only for testing
+    // Maybe need to change this behavior later
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/__SITE_TITLE__/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
 
