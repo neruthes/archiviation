@@ -40,7 +40,7 @@ let projectInitializationEntry = function () {
     fs.writeFileSync('html/robots.txt', [
         'User-agent: *',
         'Crawl-delay: 10',
-        'Disallow: /*'
+        'Disallow: /'
     ].join('\n'));
     fs.writeFileSync('.last-build-docs-list.json', '[]');
     fs.writeFileSync('source-articles/Example.txt', 'This is an exmaple article.');
