@@ -57,7 +57,7 @@ You may add plaintext files in `/source-articles`.
 
 ### Publishing
 
-You are supposed to `git init` in `/html`, and only
+You are supposed to `git init` in `/html`.
 
 ## Copyright
 
