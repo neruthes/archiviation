@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Yet Another Archive</title>
+        <title>__SITE_TITLE__</title>
         <script type="text/javascript" src="bower_components/crypto-js/crypto-js.js"></script>
         <script type="text/javascript" src="bower_components/base32.min/index.js"></script>
         <style media="screen">
@@ -26,6 +26,7 @@
         }
         header h1 {
             font-size: 26px;
+            font-weight: 400;
             line-height: 1.8em;
             padding: 0;
             margin: 0;
@@ -33,17 +34,6 @@
         header h1 a {
             color: inherit;
             text-decoration: none;
-        }
-        header h2 {
-            font-size: 20px;
-            line-height: 1.8em;
-            padding: 0;
-            margin: 0;
-        }
-        header p {
-            line-height: 1.8em;
-            padding: 5px 0 0;
-            margin: 0;
         }
         .content {
             padding: 40px 0;
@@ -71,30 +61,19 @@
             padding: 0 0 0 40px;
             margin: 0;
         }
-        nav {
-            color: #333;
-            line-height: 1.8em;
-        }
-        nav a {
+        a {
             color: #17E;
         }
-        nav a:visited {
+        a:visited {
             color: #C2B;
-        }
-        aside {
-            font-family: monospace;
-            font-style: italic;
-            color: #777;
-            line-height: 1.8em;
-            text-align: center;
-        }
-        aside a {
-            color: inherit;
-            text-wrap: break-word;
         }
         footer {
             text-align: center;
             padding: 30px;
+        }
+        footer a {
+            color: #17E;
+            text-decoration: none;
         }
         </style>
     </head>
