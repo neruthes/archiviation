@@ -101,8 +101,7 @@
     <body>
         <div class="container">
             <header>
-                <h1>__SITE_TITLE__</h1>
-                <h2 class="content-header-title" id="js-ArticleTitle"></h2>
+                <h1 class="content-header-title" id="js-ArticleTitle"></h1>
             </header>
 
             <div class="content">
@@ -139,15 +138,15 @@
                 // 200 OK
                 try {
                     articleContentText = CryptoJS.AES.decrypt(e.target.responseText, articleAesKey).toString(CryptoJS.enc.Utf8);
-                    document.getElementById('js-ArticleTitle').innerHTML = articleTitle_raw
+                    document.getElementById('js-ArticleTitle').innerHTML = articleTitle_raw;
                     document.title = articleTitle_raw + ' — __SITE_TITLE__';
                 } catch (e) {
-                    showAsNotFound()
+                    showAsNotFound();
                 } finally {
                 };
             } else if (e.target.status === 404){
                 // 404 Not Found
-                showAsNotFound()
+                showAsNotFound();
             } else {
                 // 999 Unkonwn Issue
                 document.getElementById('js-ArticleTitle').innerHTML = 'Unknown Error';
