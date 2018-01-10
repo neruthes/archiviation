@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Yet Another Archive</title>
+        <script type="text/javascript" src="bower_components/crypto-js/crypto-js.js"></script>
+        <script type="text/javascript" src="bower_components/base32.min/index.js"></script>
+        <style media="screen">
+        html {
+            font-family: -apple-system, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+            font-size: 16px;
+        }
+        html, body {
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            max-width: 740px;
+            padding: 15px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding: 50px 0 0;
+        }
+        header h1 {
+            font-size: 26px;
+            line-height: 1.8em;
+            padding: 0;
+            margin: 0;
+        }
+        header h1 a {
+            color: inherit;
+            text-decoration: none;
+        }
+        header h2 {
+            font-size: 20px;
+            line-height: 1.8em;
+            padding: 0;
+            margin: 0;
+        }
+        header p {
+            line-height: 1.8em;
+            padding: 5px 0 0;
+            margin: 0;
+        }
+        .content {
+            padding: 40px 0;
+        }
+        .content p, .content nav {
+            font-family: -apple-system, 'SF UI Text', 'SF NS Text', 'Helvetica Neue', 'Helvetica', 'Open Sans', 'Arial', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.8em;
+        }
+        @media screen and (max-width: 400px) {
+            .content p {
+                font-size: 20px;
+            }
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            line-height: 1.8em;
+            padding: 30px 0 10px;
+            margin: 0;
+        }
+        ul {
+            padding: 0 0 0 40px;
+            margin: 0;
+        }
+        nav {
+            color: #333;
+            line-height: 1.8em;
+        }
+        nav a {
+            color: #17E;
+        }
+        nav a:visited {
+            color: #C2B;
+        }
+        aside {
+            font-family: monospace;
+            font-style: italic;
+            color: #777;
+            line-height: 1.8em;
+            text-align: center;
+        }
+        aside a {
+            color: inherit;
+            text-wrap: break-word;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>__SITE_TITLE__</h1>
+                <h2 class="content-header-title" id="js-ArticleTitle"></h2>
+            </header>
+
+            <div class="content">
+                <article>
+                    <div class="" id="js-Article">
+
+                    </div>
+                </article>
+            </div>
+
+            <!-- <div class="content">
+                <aside>* * * E O F * * *</aside>
+            </div> -->
+
+            <footer>
+                <div class="">
+                    Powered by <a target="_blank" rel="nofollow" href="https://github.com/joyneop/archiviation">Archiviation</a>
+                </div>
+            </footer>
+        </div>
+        <script type="text/javascript">
+        var articleTitle_raw = '';
+        var articleAesKey = '';
+        </script>
+        <script type="text/javascript">
+        // Determine file name
+        var showAsNotFound = function () {
+            document.getElementById('js-ArticleTitle').innerHTML = '404 Not Found';
+            document.title = '404 Not Found — __SITE_TITLE__';
+        };
+        var articleContentLoadEventHandler = function (e) {
+            var articleContentText = '';
+            if (e.target.status === 200) {
+                // 200 OK
+                try {
+                    articleContentText = CryptoJS.AES.decrypt(e.target.responseText, articleAesKey).toString(CryptoJS.enc.Utf8);
+                    document.getElementById('js-ArticleTitle').innerHTML = articleTitle_raw
+                    document.title = articleTitle_raw + ' — __SITE_TITLE__';
+                } catch (e) {
+                    showAsNotFound()
+                } finally {
+                };
+            } else if (e.target.status === 404){
+                // 404 Not Found
+                showAsNotFound()
+            } else {
+                // 999 Unkonwn Issue
+                document.getElementById('js-ArticleTitle').innerHTML = 'Unknown Error';
+                articleContentText = 'An unkonwn issue occured.';
+            };
+            document.getElementById('js-Article').innerHTML = articleContentText;
+        };
+        if (location.href.indexOf('#') === -1) {
+            // Homepage
+            document.title = 'Homepage';
+            document.getElementById('js-ArticleTitle').innerHTML = 'Homepage';
+            document.getElementById('js-Article').innerHTML = '<p style="text-align: center;">Well, there is no listing on this homepage.</p>';
+        } else if (location.hash.length <= 65) {
+            location.replace(location.href.replace(location.hash, ''));
+        } else {
+            // Normal article
+            articleAesKey = location.hash.slice(1, 65);
+            articleTitle_raw = decodeURIComponent(base32.decode(location.hash.slice(65)));
+            var xhr = new XMLHttpRequest();
+            xhr.addEventListener('load', articleContentLoadEventHandler);
+            xhr.open('GET', '/db/' + base32.encode(CryptoJS.SHA256(articleTitle_raw).toString()));
+            xhr.send();
+        };
+        window.addEventListener('hashchange', function () {
+            location.reload();
+        })
+        </script>
+    </body>
+</html>
