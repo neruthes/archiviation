@@ -39,7 +39,7 @@ let projectInitializationEntry = function () {
         'Disallow: /'
     ].join('\n'));
     fs.writeFileSync('.last-build-docs-list.json', '[]');
-    fs.writeFileSync('source-articles/Example.txt', 'This is an exmaple article.');
+    fs.writeFileSync('source-articles/Example.txt', 'This is an example article.');
 
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
