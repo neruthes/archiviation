@@ -28,8 +28,8 @@ let projectInitializationEntry = function () {
         masterKey: (uuidv4() + uuidv4() + uuidv4() + uuidv4() + uuidv4()).replace(/-/g, '')
     };
 
-    exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .cache');
-    exec('touch docs-index.txt; touch html/index.html; touch .cache/last-build-docs-list.json; touch .cache/last-build-docs-checksums.json');
+    exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
+    exec('touch docs-index.txt; touch html/index.html; touch .meta/last-build-docs-list.json; touch .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
     fs.writeFile('archiviation-config.json', JSON.stringify(config), function () {});
@@ -38,9 +38,9 @@ let projectInitializationEntry = function () {
         'Crawl-delay: 10',
         'Disallow: /'
     ].join('\n'), function () {});
-    fs.writeFile('.cache/last-build-docs-list.json', '[]', function () {});
+    fs.writeFile('.meta/last-build-docs-list.json', '[]', function () {});
     fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
-        fs.writeFile('.cache/last-build-docs-checksums.json', JSON.stringify({
+        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
             'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
         }), function () {});
     });
@@ -71,9 +71,9 @@ let projectBuildingEntry = function () {
     var articlesDeletedInThisBuild = [];
     var articlesAddedInThisBuild = [];
     var articlesEditedInThisBuild = [];
-    var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.cache/last-build-docs-list.json').toString());
+    var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-list.json').toString());
     var listOfArticles_thisBuild = [];
-    var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.cache/last-build-docs-checksums.json').toString());
+    var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-checksums.json').toString());
     var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild));
     exec('ls -1 source-articles', function (err, stdout, stderr) {
         if (stdout || stdout === '') {
@@ -137,8 +137,8 @@ let projectBuildingEntry = function () {
 
                         // Write the index into file
                         fs.writeFile('docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
-                        fs.writeFile('.cache/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild), function () {});
-                        fs.writeFile('.cache/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
+                        fs.writeFile('.meta/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild), function () {});
+                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
 
                         // Index change reports
                         if (articlesDeletedInThisBuild.length > 0) {
