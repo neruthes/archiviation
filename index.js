@@ -28,23 +28,27 @@ let projectInitializationEntry = function () {
         masterKey: (uuidv4() + uuidv4() + uuidv4() + uuidv4() + uuidv4()).replace(/-/g, '')
     };
 
-    exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir;');
-    exec('touch docs-index.txt; touch html/index.html;');
+    exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .cache');
+    exec('touch docs-index.txt; touch html/index.html; touch .cache/last-build-docs-list.json; touch .cache/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
-    fs.writeFileSync('archiviation-config.json', JSON.stringify(config));
-    fs.writeFileSync('html/robots.txt', [
+    fs.writeFile('archiviation-config.json', JSON.stringify(config), function () {});
+    fs.writeFile('html/robots.txt', [
         'User-agent: *',
         'Crawl-delay: 10',
         'Disallow: /'
-    ].join('\n'));
-    fs.writeFileSync('.last-build-docs-list.json', '[]');
-    fs.writeFileSync('source-articles/Example.txt', 'This is an example article.');
+    ].join('\n'), function () {});
+    fs.writeFile('.cache/last-build-docs-list.json', '[]', function () {});
+    fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
+        fs.writeFile('.cache/last-build-docs-checksums.json', JSON.stringify({
+            'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
+        }), function () {});
+    });
 
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
 
-    exec('cd html; bower install crypto-js; bower install bower install https://raw.githubusercontent.com/agnoster/base32-js/master/dist/base32.min.js;');
+    exec('cd html; bower install crypto-js; bower install https://raw.githubusercontent.com/agnoster/base32-js/master/dist/base32.min.js;');
 
     console.log('Initialization started. Learn how to use: https://github.com/joyneop/archiviation');
 };
@@ -55,7 +59,7 @@ let projectBuildingEntry = function () {
     // Rewrite default webpage template
     // Maybe need to change this behavior later
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/__SITE_TITLE__/g, config.siteName);
-    fs.writeFileSync('html/index.html', indexPageTemplateDefault);
+    fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
     const getDeployedUrlForArticle = function (articleFileName_raw) {
         return config.deploymentTarget + '/#' + getKeyForArticle(articleFileName_raw) + base32.encode(encodeURIComponent(articleFileName_raw));
@@ -66,8 +70,11 @@ let projectBuildingEntry = function () {
     var theFullListOfAllArticlesAndTheirDeployedUrls = '';
     var articlesDeletedInThisBuild = [];
     var articlesAddedInThisBuild = [];
-    var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.last-build-docs-list.json').toString());
+    var articlesEditedInThisBuild = [];
+    var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.cache/last-build-docs-list.json').toString());
     var listOfArticles_thisBuild = [];
+    var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.cache/last-build-docs-checksums.json').toString());
+    var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild));
     exec('ls -1 source-articles', function (err, stdout, stderr) {
         if (stdout || stdout === '') {
             if (stdout === '') { // `source-articles` is empty
@@ -80,57 +87,86 @@ let projectBuildingEntry = function () {
             listOfArticles_lastBuild.map(function (articleFileName_raw) {
                 if (listOfArticles_thisBuild.indexOf(articleFileName_raw) === -1) {
                     // This article has disappeared in the current build
-                    fs.unlinkSync('html/db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
+                    fs.unlink('html/db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()), function () {});
                     articlesDeletedInThisBuild.push(articleFileName_raw);
                 };
             });
 
-            // Compile these articles
+            // Compile articles
             listOfArticles_thisBuild.map(function (articleFileName_raw, iterationCount) {
                 var keyForThisArticle = getKeyForArticle(articleFileName_raw);
 
-                fs.writeFileSync('html/db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()), CryptoJS.AES.encrypt(markdown.render(fs.readFileSync('source-articles/' + articleFileName_raw).toString()), keyForThisArticle).toString());
                 theFullListOfAllArticlesAndTheirDeployedUrls += articleFileName_raw + '\n';
                 theFullListOfAllArticlesAndTheirDeployedUrls += getDeployedUrlForArticle(articleFileName_raw) + '\n\n';
 
-                // New in this build
-                if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
-                    // New article added to archive
-                    articlesAddedInThisBuild.push(articleFileName_raw);
-                };
+                // Load file
+                fs.readFile('source-articles/' + articleFileName_raw, 'utf8', function (err, articleContent) {
+                    var isWritingNeeded = false;
+                    var articleChecksum = CryptoJS.SHA256(articleContent).toString();
 
-                // Automate `git add`
-                articlesAddedInThisBuild.map(function (articleTitle_raw) {
-                    exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
+                    if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
+                        // New article added to archive
+                        isWritingNeeded = true;
+                        checksumsOfArticles_thisBuild[articleFileName_raw] = articleChecksum;
+                        articlesAddedInThisBuild.push(articleFileName_raw);
+                    } else if (articleChecksum !== checksumsOfArticles_lastBuild[articleFileName_raw]) {
+                        // This article is modified since last build
+                        isWritingNeeded = true;
+                        checksumsOfArticles_thisBuild[articleFileName_raw] = articleChecksum;
+                        articlesEditedInThisBuild.push(articleFileName_raw);
+                    };
+
+                    // Write files
+                    if (isWritingNeeded) {
+                        fs.writeFile(
+                            'html/db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()),
+                            CryptoJS.AES.encrypt(markdown.render(articleContent), keyForThisArticle).toString(),
+                            function () {}
+                        );
+                    };
+
+                    // Automate `git add`
+                    articlesAddedInThisBuild.concat(articlesEditedInThisBuild).map(function (articleTitle_raw) {
+                        exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
+                    });
+
+                    // Last of articles
+                    if (iterationCount === listOfArticles_thisBuild.length - 1) {
+                        // Building reports
+                        console.log('Project successfully built.');
+
+                        // Write the index into file
+                        fs.writeFile('docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
+                        fs.writeFile('.cache/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild), function () {});
+                        fs.writeFile('.cache/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
+
+                        // Index change reports
+                        if (articlesDeletedInThisBuild.length > 0) {
+                            if (articlesDeletedInThisBuild.length === 1) {
+                                console.log('\nThe following article is deleted.');
+                            } else {
+                                console.log('\nThe following articles are deleted.');
+                            };
+                            console.log('\x1b[31m%s\x1b[0m', articlesDeletedInThisBuild.join('\n').split('\n').map( x => '-\t' + x).join('\n'));
+                        };
+                        if (articlesAddedInThisBuild.length > 0) {
+                            if (articlesAddedInThisBuild.length === 1) {
+                                console.log('\nThe following article is added.');
+                            } else {
+                                console.log('\nThe following articles are added.');
+                            };
+                            console.log('\x1b[32m%s\x1b[0m', articlesAddedInThisBuild.join('\n').split('\n').map(x => '+\t' + x + '\n\t' + getDeployedUrlForArticle(x)).join('\n'));
+                        };
+                        if (articlesEditedInThisBuild.length > 0) {
+                            if (articlesEditedInThisBuild.length === 1) {
+                                console.log('\nThe following article is edited.');
+                            } else {
+                                console.log('\nThe following articles are edited.');
+                            };
+                            console.log('\x1b[33m%s\x1b[0m', articlesEditedInThisBuild.join('\n').split('\n').map(x => '*\t' + x + '\n\t' + getDeployedUrlForArticle(x)).join('\n'));
+                        };
+                    };
                 });
-
-                // Last of articles
-                if (iterationCount === listOfArticles_thisBuild.length - 1) {
-                    // Building reports
-                    console.log('Project successfully built.');
-
-                    // Write the index into file
-                    fs.writeFileSync('docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls);
-                    fs.writeFileSync('.last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild));
-
-                    // Index change reports
-                    if (articlesDeletedInThisBuild.length > 0) {
-                        if (articlesDeletedInThisBuild.length === 1) {
-                            console.log('\nThe following article is deleted.');
-                        } else {
-                            console.log('\nThe following articles are deleted.');
-                        };
-                        console.log('\x1b[31m%s\x1b[0m', articlesDeletedInThisBuild.join('\n').split('\n').map( x => '-\t' + x).join('\n'));
-                    };
-                    if (articlesAddedInThisBuild.length > 0) {
-                        if (articlesAddedInThisBuild.length === 1) {
-                            console.log('\nThe following article is added.');
-                        } else {
-                            console.log('\nThe following articles are added.');
-                        };
-                        console.log('\x1b[32m%s\x1b[0m', articlesAddedInThisBuild.join('\n').split('\n').map(x => '+\t' + x + '\n\t' + getDeployedUrlForArticle(x)).join('\n'));
-                    };
-                };
             });
         };
         if (err) {
