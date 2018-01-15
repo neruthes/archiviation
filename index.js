@@ -29,10 +29,11 @@ let projectInitializationEntry = function () {
     };
 
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
-    exec('touch docs-index.txt; touch html/index.html; touch .meta/last-build-docs-list.json; touch .meta/last-build-docs-checksums.json');
+    exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
     fs.writeFile('archiviation-config.json', JSON.stringify(config), function () {});
+    fs.writeFile('.gitignore', 'html/db/*', function () {});
     fs.writeFile('html/robots.txt', [
         'User-agent: *',
         'Crawl-delay: 10',
