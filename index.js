@@ -205,6 +205,20 @@ program.command('build')
     .description('Build your contents into the desired static website.')
     .action(projectBuildingEntry);
 
+program.command('rebuild')
+    .description('Rebuild website, clearing cache, preserving configuration.')
+    .action(function () {
+        exec('rm html/db/*;');
+        fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
+        fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
+            fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
+                'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
+            }), function () {});
+        });
+
+        projectBuildingEntry();
+    });
+
 program.command('list')
     .description('Show all articles in the archive.')
     .action(projectListingEntry);
