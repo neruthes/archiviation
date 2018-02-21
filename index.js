@@ -8,6 +8,7 @@ const CryptoJS = require('crypto-js');
 const URL = require('url');
 const markdown = require('markdown-it')();
 const base32 = require('base32');
+const base64img = require('base64-img');
 
 const exec = require('child_process').exec;
 
@@ -104,6 +105,15 @@ let projectBuildingEntry = function () {
                 fs.readFile('source-articles/' + articleFileName_raw, 'utf8', function (err, articleContent) {
                     var isWritingNeeded = false;
                     var articleChecksum = CryptoJS.SHA256(articleContent).toString();
+                    var articleContent_processed = articleContent;
+
+                    if (articleFileName_raw.match(/\.(png|jpg)$/)) {
+                        // Convert images to Base64
+                        articleContent_processed = '<img src="DATA">'.replace('DATA', base64img.base64Sync('source-articles/' + articleFileName_raw));
+                    } else {
+                        // Regular text files
+                        articleContent_processed = markdown.render(articleContent);
+                    };
 
                     if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
                         // New article added to archive
@@ -121,15 +131,16 @@ let projectBuildingEntry = function () {
                     if (isWritingNeeded) {
                         fs.writeFile(
                             'html/db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()),
-                            CryptoJS.AES.encrypt(markdown.render(articleContent), keyForThisArticle).toString(),
+                            CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
                             function () {}
                         );
                     };
 
                     // Automate `git add`
-                    articlesAddedInThisBuild.concat(articlesEditedInThisBuild).map(function (articleTitle_raw) {
-                        exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
-                    });
+                    // No longer needed
+                    // articlesAddedInThisBuild.concat(articlesEditedInThisBuild).map(function (articleTitle_raw) {
+                        // exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
+                    // });
 
                     // Last of articles
                     if (iterationCount === listOfArticles_thisBuild.length - 1) {

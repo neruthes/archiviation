@@ -19,6 +19,7 @@
   "homepage": "https://github.com/joyneop/archiviation#readme",
   "dependencies": {
     "base32": "0.0.6",
+    "base64-img": "^1.0.4",
     "bower": "*",
     "child_process": "*",
     "commander": "*",
