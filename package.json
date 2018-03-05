@@ -25,6 +25,6 @@
     "commander": "*",
     "crypto-js": "*",
     "markdown-it": "*",
-    "url": "*",
+    "url": "*"
   }
 }
