@@ -1,6 +1,6 @@
 # Archiviation (work-in-progress)
 
-The best way to publish text with GitHub Pages without allowing everyone to read.
+A way to publish text with GitHub Pages without allowing everyone to read.
 
 Note: This software does not have a stable version yet.
 
@@ -25,7 +25,7 @@ Minor dependencies will be installed automatically when you run `npm install .` 
 ### Installation
 
 ```
-$ git clone https://github.com/joyneop/archiviation.git
+$ git clone https://github.com/neruthes/archiviation.git
 $ cd archiviation
 $ npm install .
 $ npm link
@@ -61,6 +61,6 @@ You are supposed to `git init` in `/html`.
 
 ## Copyright
 
-Author: Joy Neop (a.k.a. Neruthes)
+Author: Neruthes (a.k.a. J.N.)
 
-License: MIT License.
+License: AGPL.
