@@ -107,8 +107,8 @@ let projectBuildingEntry = function () {
             listOfArticles_thisBuild.map(function (articleFileName_raw, iterationCount) {
                 var keyForThisArticle = getKeyForArticle(articleFileName_raw);
 
-                theFullListOfAllArticlesAndTheirDeployedUrls += articleFileName_raw + '\n';
-                theFullListOfAllArticlesAndTheirDeployedUrls += getDeployedUrlForArticle(articleFileName_raw) + '\n\n';
+                theFullListOfAllArticlesAndTheirDeployedUrls += '[' + articleFileName_raw + ']';
+                theFullListOfAllArticlesAndTheirDeployedUrls += '(' + getDeployedUrlForArticle(articleFileName_raw) + ')\n\n';
 
                 // Load file
                 fs.readFile('source-articles/' + articleFileName_raw, 'utf8', function (err, articleContent) {
@@ -160,6 +160,9 @@ let projectBuildingEntry = function () {
                     if (iterationCount === listOfArticles_thisBuild.length - 1) {
                         // Building reports
                         console.log('Project successfully built.');
+
+                        // Write the index as an article
+                        fs.writeFile('source-articles/docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
 
                         // Write the index into file
                         fs.writeFile('docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
