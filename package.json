@@ -1,7 +1,7 @@
 {
   "name": "archiviation",
   "bin": "index.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joyneop/archiviation.git"
+    "url": "git+https://github.com/neruthes/archiviation.git"
   },
   "author": "Neruthes (a.k.a. Joy Neop)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/joyneop/archiviation/issues"
+    "url": "https://github.com/neruthes/archiviation/issues"
   },
-  "homepage": "https://github.com/joyneop/archiviation#readme",
+  "homepage": "https://github.com/neruthes/archiviation#readme",
   "dependencies": {
     "base32": "0.0.6",
     "base64-img": "^1.0.4",

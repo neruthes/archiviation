@@ -24,17 +24,19 @@ Minor dependencies will be installed automatically when you run `npm install .` 
 
 ### Installation
 
+When I publish Archiviation on NPM, these steps will be simplified to:
+
+```
+$ npm install -g archiviation
+```
+
+If NPM is not available:
+
 ```
 $ git clone https://github.com/neruthes/archiviation.git
 $ cd archiviation
 $ npm install .
 $ npm link
-```
-
-When I publish Archiviation on NPM, these steps will be simplified to:
-
-```
-$ npm install -g archiviation
 ```
 
 ### Initialization

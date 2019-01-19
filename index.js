@@ -41,7 +41,7 @@ let projectInitializationEntry = function () {
         'Crawl-delay: 10',
         'Disallow: /'
     ].join('\n'), function () {});
-    fs.writeFile('.meta/last-build-docs-list.json', '[]', function () {});
+    fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
     fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
         var hash = crypto.createHash('sha256');
         hash.update(fs.readFileSync('source-articles/Example.txt').toString());
