@@ -56,7 +56,7 @@ let projectInitializationEntry = function () {
 
     exec('cd html; bower install crypto-js; bower install https://raw.githubusercontent.com/agnoster/base32-js/master/dist/base32.min.js;');
 
-    console.log('Initialization started. Learn how to use: https://github.com/joyneop/archiviation');
+    console.log('Initialization started. Learn how to use: https://github.com/neruthes/archiviation');
 };
 
 let projectBuildingEntry = function () {

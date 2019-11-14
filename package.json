@@ -1,7 +1,7 @@
 {
   "name": "archiviation",
   "bin": "index.js",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,8 @@
     "type": "git",
     "url": "git+https://github.com/neruthes/archiviation.git"
   },
-  "author": "Neruthes (a.k.a. Joy Neop)",
-  "license": "MIT",
+  "author": "Neruthes <neruthes.xyz>",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/neruthes/archiviation/issues"
   },
