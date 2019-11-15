@@ -17,6 +17,11 @@ const program = require('commander');
 
 const pkg = require('./package.json');
 
+
+
+exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
+exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
+
 //
 // ---------------------------------------------------------------
 // Command implementations
@@ -34,22 +39,21 @@ let projectInitializationEntry = function () {
     exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
-    fs.writeFile('archiviation-config.json', JSON.stringify(config), function () {});
-    fs.writeFile('.gitignore', 'html/db/*', function () {});
-    fs.writeFile('html/robots.txt', [
+    fs.writeFileSync('archiviation-config.json', JSON.stringify(config), function () {});
+    fs.writeFileSync('.gitignore', 'html/db/*', function () {});
+    fs.writeFileSync('html/robots.txt', [
         'User-agent: *',
         'Crawl-delay: 10',
         'Disallow: /'
     ].join('\n'), function () {});
     fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
-    fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
-        var hash = crypto.createHash('sha256');
-        hash.update(fs.readFileSync('source-articles/Example.txt').toString());
-        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
-            // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
-            'Example.txt': hash.digest('hex')
-        }), function () {});
-    });
+    fs.writeFileSync('source-articles/Example.txt', 'This is an example article.\n');
+    var hash = crypto.createHash('sha256');
+    hash.update(fs.readFileSync('source-articles/Example.txt').toString());
+    fs.writeFileSync('.meta/last-build-docs-checksums.json', JSON.stringify({
+        // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
+        'Example.txt': hash.digest('hex')
+    }));
 
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
@@ -76,14 +80,20 @@ let projectBuildingEntry = function () {
         hash.update(config.masterKey + 'dASz+r+L1GvOUAKrcy9x5q7lXOL/aD7gRLcczwmXJ0iRUtuFEVkeR/UCkkl8LIU1tDzIhCLbePtYdxO70+ligfNziZ98PimpLU8a3NDWrhRsWL46Jlch8piGFaIVl9xhIts2prYs2oMJrsandWjvcss44O+Qjtxm7ZP8ssx9rmw=' + articleFileName_raw);
         return hash.digest('hex');
     };
-    var theFullListOfAllArticlesAndTheirDeployedUrls = '';
-    var articlesDeletedInThisBuild = [];
-    var articlesAddedInThisBuild = [];
-    var articlesEditedInThisBuild = [];
-    var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-list.json').toString());
-    var listOfArticles_thisBuild = [];
-    var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-checksums.json').toString());
-    var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild));
+    try {
+        var theFullListOfAllArticlesAndTheirDeployedUrls = '';
+        var articlesDeletedInThisBuild = [];
+        var articlesAddedInThisBuild = [];
+        var articlesEditedInThisBuild = [];
+        var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-list.json').toString());
+        var listOfArticles_thisBuild = [];
+        var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-checksums.json').toString());
+        var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild));
+    } catch (e) {
+        projectBuildingEntry();
+    } finally {
+
+    }
     exec('ls -1 source-articles', function (err, stdout, stderr) {
         if (stdout || stdout === '') {
             if (stdout === '') { // `source-articles` is empty
