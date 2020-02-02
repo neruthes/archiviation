@@ -58,9 +58,7 @@ let projectInitializationEntry = function () {
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
 
-    exec('cd html; bower install crypto-js; bower install https://raw.githubusercontent.com/agnoster/base32-js/master/dist/base32.min.js;');
-
-    console.log('Initialization started. Learn how to use: https://github.com/neruthes/archiviation');
+    console.log('Initialization done. Learn how to use: https://github.com/neruthes/archiviation');
 };
 
 let projectBuildingEntry = function () {
@@ -107,7 +105,7 @@ let projectBuildingEntry = function () {
                 if (listOfArticles_thisBuild.indexOf(articleFileName_raw) === -1) {
                     // This article has disappeared in the current build
                     var hash = crypto.createHash('sha256');
-                    hash.upadte('articleFileName_raw');
+                    hash.update(articleFileName_raw);
                     fs.unlink('html/db/' + base32.encode(hash.digest('hex')), function () {});
                     articlesDeletedInThisBuild.push(articleFileName_raw);
                 };
@@ -151,7 +149,7 @@ let projectBuildingEntry = function () {
                     // Write files
                     if (isWritingNeeded) {
                         var hash__articleFileName_raw = crypto.createHash('sha256');
-                        hash__articleFileName_raw.update(articleFileName_raw);
+                        hash__articleFileName_raw.update('9cfbf34fc443455baf19c27f692ecc76-' + articleFileName_raw);
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
                         fs.writeFile(
                             'html/db/' + base32.encode(hash__articleFileName_raw.digest('hex')),
@@ -239,9 +237,29 @@ program.command('init')
     .description('Initialize a project.')
     .action(projectInitializationEntry);
 
+// Not reliable
 program.command('build')
     .description('Build your contents into the desired static website.')
-    .action(projectBuildingEntry);
+    .action(function () {
+        projectBuildingEntry();
+    });
+
+// program.command('build')
+//     .description('Build your contents into the desired static website.')
+//     .action(function () {
+//         exec('rm html/db/*;');
+//         fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
+//         fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
+//             var hash = crypto.createHash('sha256');
+//             hash.update(fs.readFileSync('source-articles/Example.txt').toString());
+//             fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
+//                 // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
+//                 'Example.txt': hash.digest('hex')
+//             }), function () {
+//                 projectBuildingEntry();
+//             });
+//         });
+//     });
 
 program.command('rebuild')
     .description('Rebuild website, clearing cache, preserving configuration.')
