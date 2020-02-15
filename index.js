@@ -129,6 +129,9 @@ let projectBuildingEntry = function () {
                     if (articleFileName_raw.match(/\.(png|jpg)$/)) {
                         // Convert images to Base64
                         articleContent_processed = '<img src="DATA">'.replace('DATA', base64img.base64Sync('source-articles/' + articleFileName_raw));
+                    } else if (articleFileName_raw.match(/\.(html|htm)$/)) {
+                        // HTML
+                        articleContent_processed = articleContent;
                     } else {
                         // Regular text files
                         articleContent_processed = markdown.render(articleContent);
