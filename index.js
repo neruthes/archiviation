@@ -118,6 +118,7 @@ let projectBuildingEntry = function () {
             });
 
             // Compile articles
+            listOfArticles_thisBuild = listOfArticles_thisBuild.sort();
             listOfArticles_thisBuild.map(function (articleFileName_raw, iterationCount) {
                 var keyForThisArticle = getKeyForArticle(articleFileName_raw);
 
