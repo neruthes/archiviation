@@ -166,6 +166,7 @@ let projectBuildingEntry = function () {
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
                         // var exportFileName = base32.encode(hash__articleFileName_raw.digest('hex'));
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
+                        fs.writeFile('html/db/uuid', 'c100cbfe-9192-43bd-a6b8-9972034d920e', function () {});
                         fs.writeFile(
                             'html/db/' + exportFileName + '.db.txt',
                             CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
