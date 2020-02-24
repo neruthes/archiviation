@@ -8,7 +8,7 @@ Note: This software does not have a stable version yet.
 
 Archiviation encrypts your text files with AES, in which the encryption key is `SHA256(master_key + random_chars + filename)`. The master key is generated during initialization, consisting of 5 UUIDs.
 
-A file can be accessed online with a URL like `https://username.github.io/#0f453f27ffffa5b60ddd5dffffc38344a04e33e310bdbd2e6b0bb4cb45680d878nw62vbgdhjjwx3reg`, after you push the repository to GitHub Pages (or any other web server). The identifier consists of the 64-character-long AES encryption key (hex) and the filename (base32). The page will load the file with XMLHttpRequest from `https://username.github.io/db/{{ base32(SHA256(filename)) }}`. So you do not have to worry about the sensitivity of file names.
+A file can be accessed online with a URL like `https://username.github.io/#0f453f27ffffa5b60ddd5dffffc38344a04e33e310bdbd2e6b0bb4cb45680d878nw62vbgdhjjwx3reg`, after you push the repository to GitHub Pages (or any other web server). The identifier consists of the 64-character-long AES encryption key (hex) and the filename hash (base32). The page will load the file with XMLHttpRequest from `https://username.github.io/db/{{ SHA256("9cfbf34fc443455baf19c27f692ecc76|" + masterKey.slice(0, 32) + filename).toString("hex") }}`. So you do not have to worry about the sensitivity of file names; the URL itself cannot be used to infer the filename.
 
 This approach should probably be cryptographically strong enough. Probably!
 
@@ -16,15 +16,12 @@ This approach should probably be cryptographically strong enough. Probably!
 
 ### Dependencies
 
-- node
-- npm
-- bower
-
-Minor dependencies will be installed automatically when you run `npm install .` command.
+- `node`
+- `npm`
 
 ### Installation
 
-When I publish Archiviation on NPM, these steps will be simplified to:
+Install through NPM:
 
 ```
 $ npm install -g archiviation

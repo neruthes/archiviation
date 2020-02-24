@@ -76,15 +76,11 @@ let projectBuildingEntry = function () {
         return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('hex');
     };
     const getDeployedUrlForArticle = function (articleFileName_raw) {
-        // Old:
-        // return config.deploymentTarget + '/#' + getKeyForArticle(articleFileName_raw) + base32.encode(encodeURIComponent(articleFileName_raw));
-        // New:
         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
         var articleKey = getKeyForArticle(articleFileName_raw);
         return config.deploymentTarget + '/#' + articleKey + exportFileName;
     };
     const getKeyForArticle = function (articleFileName_raw) {
-        // return CryptoJS.SHA256(config.masterKey + 'EC5D95CA72B5484A8DB3C6203E87FC484B5CFBA10F824DDBB4846FEC70A2946E9EB15B76614543F9A199F3B2E825BFF1' + articleFileName_raw).toString();
         var hash = crypto.createHash('sha256');
         hash.update(config.masterKey + 'dASz+r+L1GvOUAKrcy9x5q7lXOL/aD7gRLcczwmXJ0iRUtuFEVkeR/UCkkl8LIU1tDzIhCLbePtYdxO70+ligfNziZ98PimpLU8a3NDWrhRsWL46Jlch8piGFaIVl9xhIts2prYs2oMJrsandWjvcss44O+Qjtxm7ZP8ssx9rmw=' + articleFileName_raw);
         return hash.digest('hex');
