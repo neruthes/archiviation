@@ -230,7 +230,7 @@
             articleFilename = location.hash.slice(65);
             var xhr = new XMLHttpRequest();
             xhr.addEventListener('load', articleContentLoadEventHandler);
-            xhr.open('GET', '/db/' + articleFilename);
+            xhr.open('GET', '/db/' + articleFilename + '.db.txt');
             xhr.send();
         };
         window.addEventListener('hashchange', function () {

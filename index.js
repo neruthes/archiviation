@@ -51,7 +51,6 @@ let projectInitializationEntry = function () {
     var hash = crypto.createHash('sha256');
     hash.update(fs.readFileSync('source-articles/Example.txt').toString());
     fs.writeFileSync('.meta/last-build-docs-checksums.json', JSON.stringify({
-        // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
         'Example.txt': hash.digest('hex')
     }));
 
@@ -167,7 +166,7 @@ let projectBuildingEntry = function () {
                         // var exportFileName = base32.encode(hash__articleFileName_raw.digest('hex'));
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile(
-                            'html/db/' + exportFileName,
+                            'html/db/' + exportFileName + '.db.txt',
                             CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
                             function () {}
                         );
