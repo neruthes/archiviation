@@ -63,14 +63,25 @@ let projectInitializationEntry = function () {
 
 let projectBuildingEntry = function () {
     const config = JSON.parse(fs.readFileSync('archiviation-config.json').toString());
+    const dynamicDeterministicSalt = crypto.createHash('sha256').update('9cfbf34fc443455baf19c27f692ecc76-' + config.masterKey.slice(0,16)).digest('hex').slice(0, 8);
 
     // Rewrite default webpage template
     // Maybe need to change this behavior later
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/__SITE_TITLE__/g, config.siteName);
     fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
+    const getExportFilenameForArticle = function (articleFileName_raw) {
+        var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0,32)).digest('hex');
+        var hash = crypto.createHash('sha256');
+        return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('hex');
+    };
     const getDeployedUrlForArticle = function (articleFileName_raw) {
-        return config.deploymentTarget + '/#' + getKeyForArticle(articleFileName_raw) + base32.encode(encodeURIComponent(articleFileName_raw));
+        // Old:
+        // return config.deploymentTarget + '/#' + getKeyForArticle(articleFileName_raw) + base32.encode(encodeURIComponent(articleFileName_raw));
+        // New:
+        var exportFileName = getExportFilenameForArticle(articleFileName_raw);
+        var articleKey = getKeyForArticle(articleFileName_raw);
+        return config.deploymentTarget + '/#' + articleKey + exportFileName;
     };
     const getKeyForArticle = function (articleFileName_raw) {
         // return CryptoJS.SHA256(config.masterKey + 'EC5D95CA72B5484A8DB3C6203E87FC484B5CFBA10F824DDBB4846FEC70A2946E9EB15B76614543F9A199F3B2E825BFF1' + articleFileName_raw).toString();
@@ -124,7 +135,7 @@ let projectBuildingEntry = function () {
                     var hash__articleContent = crypto.createHash('sha256');
                     hash__articleContent.update(articleContent);
                     var articleContentChecksum = hash__articleContent.digest('hex');
-                    var articleContent_processed = articleContent;
+                    var articleContent_processed = '';
 
                     if (articleFileName_raw.match(/\.(png|jpg)$/)) {
                         // Convert images to Base64
@@ -136,6 +147,9 @@ let projectBuildingEntry = function () {
                         // Regular text files
                         articleContent_processed = markdown.render(articleContent);
                     };
+                    articleContent_processed = JSON.stringify({
+                        filename: articleFileName_raw
+                    }) + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContent_processed;
 
                     if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
                         // New article added to archive
@@ -152,20 +166,16 @@ let projectBuildingEntry = function () {
                     // Write files
                     if (isWritingNeeded) {
                         var hash__articleFileName_raw = crypto.createHash('sha256');
-                        hash__articleFileName_raw.update('9cfbf34fc443455baf19c27f692ecc76-' + articleFileName_raw);
+
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
+                        // var exportFileName = base32.encode(hash__articleFileName_raw.digest('hex'));
+                        var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile(
-                            'html/db/' + base32.encode(hash__articleFileName_raw.digest('hex')),
+                            'html/db/' + exportFileName,
                             CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
                             function () {}
                         );
                     };
-
-                    // Automate `git add`
-                    // No longer needed
-                    // articlesAddedInThisBuild.concat(articlesEditedInThisBuild).map(function (articleTitle_raw) {
-                        // exec('cd html; git add db/' + base32.encode(CryptoJS.SHA256(articleFileName_raw).toString()));
-                    // });
 
                     // Last of articles
                     if (iterationCount === listOfArticles_thisBuild.length - 1) {

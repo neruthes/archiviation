@@ -106,14 +106,6 @@
         a:visited {
             color: #C2B;
         }
-        footer {
-            text-align: center;
-            padding: 30px;
-        }
-        footer a:link, footer a:visited {
-            color: #17E;
-            text-decoration: none;
-        }
         </style>
         <style media="screen">
         @keyframes regularRotation {
@@ -144,26 +136,46 @@
             </div>
 
             <!-- <div class="content">
-                <aside>* * * E O F * * *</aside>
+                <aside>* * * END OF FILE * * *</aside>
             </div> -->
 
             <footer>
                 <style media="screen">
-                footer * {
+                footer {
+                    text-align: center;
+                    padding: 30px 0px;
+                }
+                footer a:link, footer a:visited {
+                    /* color: #17E; */
+                    /* text-decoration: none; */
+                }
+                footer, footer *, footer *:link, footer *:visited {
                     color: #999;
                 }
                 footer a {
                     text-decoration: underline;
                 }
+                footer p {
+                    font-size: 14px;
+                    line-height: 20px;
+                }
+                footer p span {
+                    display: inline-block;
+                }
                 </style>
                 <div class="">
-                    Powered by <a target="_blank" rel="nofollow" href="https://github.com/neurthes/archiviation">Archiviation</a>, a Free Software which is licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.html">&lt;GNU AGPL 3.0&gt;</a>.
+                    <p>
+                        <span>This archive is powered by <a target="_blank" rel="nofollow" href="https://github.com/neurthes/archiviation">Archiviation</a> (&copy 2019-<script>document.write((new Date()).getFullYear())</script>),</span>
+                        <span>a Free Software which is licensed under <a href="https://www.gnu.org/licenses/agpl-3.0.html">GNU AGPL v3</a>.</span>
+                    </p>
                 </div>
             </footer>
         </div>
         <script type="text/javascript">
-        var articleTitle_raw = '';
+        var articleFilename = '';
         var articleAesKey = '';
+        var rawArticlePayload = '';
+        var articleTitle = '';
         </script>
         <script type="text/javascript">
         // Base32
@@ -176,13 +188,17 @@
             document.title = '404 Not Found — __SITE_TITLE__';
         };
         var articleContentLoadEventHandler = function (e) {
+            var articleMetadata = {};
             var articleContentText = '';
             if (e.target.status === 200) {
                 // 200 OK
                 try {
-                    articleContentText = CryptoJS.AES.decrypt(e.target.responseText, articleAesKey).toString(CryptoJS.enc.Utf8);
-                    document.getElementById('js-ArticleTitle').innerHTML = articleTitle_raw;
-                    document.title = articleTitle_raw + ' — __SITE_TITLE__';
+                    rawArticlePayload = CryptoJS.AES.decrypt(e.target.responseText, articleAesKey).toString(CryptoJS.enc.Utf8);
+                    articleMetadata = JSON.parse(rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[0]);
+                    articleContentText = rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[1];
+                    articleTitle = articleMetadata.filename;
+                    document.getElementById('js-ArticleTitle').innerHTML = articleMetadata.filename;
+                    document.title = articleTitle + ' — __SITE_TITLE__';
                 } catch (e) {
                     showAsNotFound();
                 } finally {
@@ -207,10 +223,10 @@
         } else {
             // Normal article
             articleAesKey = location.hash.slice(1, 65);
-            articleTitle_raw = decodeURIComponent(base32.decode(location.hash.slice(65)));
+            articleFilename = location.hash.slice(65);
             var xhr = new XMLHttpRequest();
             xhr.addEventListener('load', articleContentLoadEventHandler);
-            xhr.open('GET', '/db/' + base32.encode(CryptoJS.SHA256('9cfbf34fc443455baf19c27f692ecc76-' + articleTitle_raw).toString()));
+            xhr.open('GET', '/db/' + articleFilename);
             xhr.send();
         };
         window.addEventListener('hashchange', function () {
