@@ -19,8 +19,11 @@ const pkg = require('./package.json');
 
 
 
-exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
-exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
+try {
+
+} catch (e) {
+} finally {
+}
 
 //
 // ---------------------------------------------------------------
@@ -234,6 +237,12 @@ let projectFixingEntry = function () {
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
 };
 
+let mkdir_and_touch = function (callback) {
+    exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta;');
+    exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json;');
+    exec('touch html/.gitkeep; touch html/custom.css; touch html/db/.gitkeep;');
+    callback();
+};
 
 //
 // ---------------------------------------------------------------
@@ -251,7 +260,14 @@ program.command('init')
 program.command('build')
     .description('Build your contents into the desired static website.')
     .action(function () {
-        projectBuildingEntry();
+        fs.readFile('archiviation-config.json', function (err, res) {
+            if (err === null) {
+                mkdir_and_touch(projectBuildingEntry);
+            } else {
+                console.error('Not a valid project directory!');
+                process.exit(1);
+            };
+        });
     });
 
 // program.command('build')
@@ -274,18 +290,28 @@ program.command('build')
 program.command('rebuild')
     .description('Rebuild website, clearing cache, preserving configuration.')
     .action(function () {
-        exec('rm html/db/*;');
-        fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
-        fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
-            var hash = crypto.createHash('sha256');
-            hash.update(fs.readFileSync('source-articles/Example.txt').toString());
-            fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
-                // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
-                'Example.txt': hash.digest('hex')
-            }), function () {
-                projectBuildingEntry();
-            });
+        fs.readFile('archiviation-config.json', function (err, res) {
+            if (err === null) {
+                mkdir_and_touch(function () {
+                    exec('rm html/db/*;');
+                    fs.writeFileSync('.meta/last-build-docs-list.json', '[]');
+                    fs.writeFile('source-articles/Example.txt', 'This is an example article.\n', function () {
+                        var hash = crypto.createHash('sha256');
+                        hash.update(fs.readFileSync('source-articles/Example.txt').toString());
+                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
+                            // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
+                            'Example.txt': hash.digest('hex')
+                        }), function () {
+                            projectBuildingEntry();
+                        });
+                    });
+                });
+            } else {
+                console.error('Not a valid project directory!');
+                process.exit(1);
+            };
         });
+
 
     });
 
