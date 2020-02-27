@@ -218,6 +218,9 @@
     				h6: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}`,
     				p:  `P-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}p${tagCount.p}`
     			};
+                if (!nodeId) {
+					return 1;
+				};
     			node.setAttribute('id', nodeId[tagName]);
     			if (tagName.match(/^h[1-6]$/)) {
     				node.innerHTML = `<a href="#${nodeId[tagName]}" style="color: inherit;">${node.innerText.trim()}</a>`;
