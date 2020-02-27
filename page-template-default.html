@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- Geneated by Archiviation (v__APP_VER__)  -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>__SITE_TITLE__</title>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/brix/crypto-js@3.1.9-1/crypto-js.min.js"></script>
+        <script type="text/javascript">
+        var parsedQueryParam = (function () {
+    		var tmpArr = location.search.slice(1).split('&').map(x => x.split('='));
+    		var tmpObj = {};
+    		tmpArr.map(x => tmpObj[x[0]]=x[1]);
+    		return tmpObj;
+    	})();
+    	var debug = function (msg) {
+    		if (parsedQueryParam.debug === 'yes') {
+    			console.log('Debug Stamp:', msg);
+    		};
+    	};
+        </script>
         <style media="screen">
         html {
             font-family: -apple-system, 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
@@ -176,8 +190,6 @@
             </footer>
         </div>
         <script type="text/javascript">
-        var articleFilename = '';
-        var articleAesKey = '';
         var rawArticlePayload = '';
         var articleTitle = '';
         </script>
@@ -186,7 +198,49 @@
         !function(){function t(){var t=0,e=0;this.output="",this.readByte=function(r){return"string"==typeof r&&(r=r.charCodeAt(0)),0>t?e|=r>>-t:e=r<<t&248,t>3?(t-=8,1):(4>t&&(this.output+=i[e>>3],t+=5),0)},this.finish=function(r){var n=this.output+(0>t?i[e>>3]:"")+(r?"$":"");return this.output="",n}}function e(){var t=0,e=0;this.output="",this.readChar=function(r){"string"!=typeof r&&"number"==typeof r&&(r=String.fromCharCode(r)),r=r.toLowerCase();var n=s()[r];"undefined"!=typeof n&&(n<<=3,e|=n>>>t,t+=5,t>=8&&(this.output+=String.fromCharCode(e),t-=8,e=t>0?n<<5-t&255:0))},this.finish=function(e){var r=this.output+(0>t?i[bits>>3]:"")+(e?"$":"");return this.output="",r}}function r(e){var r=new t,n=r.update(e,!0);return n}function n(t){var r=new e,n=r.update(t,!0);return n}function u(t,e){"undefined"==typeof f&&(f=require("crypto"));var n=f.createHash("sha1");if(n.digest=function(t){return function(){return r(t.call(this,"binary"))}}(n.digest),e){if("string"==typeof t||Buffer.isBuffer(t))try{return e(null,u(t))}catch(i){return e(i,null)}return t.on("data",function(t){n.update(t)}),void t.on("end",function(){e(null,n.digest())})}return t?n.update(t).digest():n}var i="0123456789abcdefghjkmnpqrtuvwxyz",o={o:0,i:1,l:1,s:5},s=function(){for(var t={},e=0;e<i.length;e++)t[i[e]]=e;for(var r in o)o.hasOwnProperty(r)&&(t[r]=t[""+o[r]]);return s=function(){return t},t};t.prototype.update=function(t,e){for(var r=0;r<t.length;)r+=this.readByte(t[r]);var n=this.output;return this.output="",e&&(n+=this.finish()),n},e.prototype.update=function(t,e){for(var r=0;r<t.length;r++)this.readChar(t[r]);var n=this.output;return this.output="",e&&(n+=this.finish()),n};var f,a;u.file=function(t,e){return"-"==t?(process.stdin.resume(),u(process.stdin,e)):("undefined"==typeof a&&(a=require("fs")),a.stat(t,function(r,n){return r?e(r,null):n.isDirectory()?e({dir:!0,message:"Is a directory"}):u(require("fs").createReadStream(t),e)}))};var d={Decoder:e,Encoder:t,encode:r,decode:n,sha1:u};"undefined"!=typeof window&&(window.base32=d),"undefined"!=typeof module&&module.exports&&(module.exports=d)}();
         </script>
         <script type="text/javascript">
-        // Determine file name
+        var setIdForContentNodes = function () {
+            // Modify <h1> <h2> <h3> tags
+    		window.tagCount = {};
+    		var hierarchyOrder = 'h1 h2 h3 h4 h5 h6 p'.split(' ');
+    		hierarchyOrder.map(tagName => tagCount[tagName] = 0);
+    		var headingIdModifier = function (node) {
+    			var tagName = node.tagName.toLowerCase();
+    			if ('blockquote pre hr'.split(' ').indexOf(tagName) !== -1) { // Normalized tagName to "p"
+    				tagName = 'p';
+    			};
+    			tagCount[tagName] += 1;
+    			var nodeId = {
+    				h1: `H-a${tagCount.h1}`,
+    				h2: `H-a${tagCount.h1}b${tagCount.h2}`,
+    				h3: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}`,
+    				h4: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}`,
+    				h5: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}`,
+    				h6: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}`,
+    				p:  `P-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}p${tagCount.p}`
+    			};
+    			node.setAttribute('id', nodeId[tagName]);
+    			if (tagName.match(/^h[1-6]$/)) {
+    				node.innerHTML = `<a href="#${nodeId[tagName]}" style="color: inherit;">${node.innerText.trim()}</a>`;
+    			};
+
+    			// Reset counts of lower ranks
+    			if (tagName !== 'p') {
+    				hierarchyOrder.slice(hierarchyOrder.indexOf(tagName) + 1).map(function (_tagName) {
+    					tagCount[_tagName] = 0;
+    				});
+    			};
+    		};
+            document.querySelectorAll('#js-Article > *').forEach(headingIdModifier);
+			// Navigate to specified element
+			(function () {
+				setTimeout(function () {
+					if (document.getElementById(location.hash.slice(1))) {
+						window.scrollTo(0, document.querySelector(location.hash).offsetTop-30);
+						console.log(document.querySelector(location.hash).offsetTop);
+					}
+				}, 1);
+			})();
+        };
         var showAsNotFound = function () {
             document.getElementById('js-ArticleTitle').innerHTML = '404 Not Found';
             document.title = '404 Not Found — __SITE_TITLE__';
@@ -197,7 +251,7 @@
             if (e.target.status === 200) {
                 // 200 OK
                 try {
-                    rawArticlePayload = CryptoJS.AES.decrypt(e.target.responseText, articleAesKey).toString(CryptoJS.enc.Utf8);
+                    rawArticlePayload = CryptoJS.AES.decrypt(e.target.responseText, parsedQueryParam.key).toString(CryptoJS.enc.Utf8);
                     articleMetadata = JSON.parse(rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[0]);
                     articleContentText = rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[1];
                     articleTitle = articleMetadata.filename;
@@ -216,25 +270,24 @@
                 articleContentText = 'An unkonwn issue occured.';
             };
             document.getElementById('js-Article').innerHTML = articleContentText;
+            setIdForContentNodes();
         };
-        if (location.href.indexOf('#') === -1) {
+        if (location.search.length < 4) {
             // Homepage
             document.title = 'Homepage';
             document.getElementById('js-ArticleTitle').innerHTML = 'Homepage';
             document.getElementById('js-Article').innerHTML = '<p style="text-align: center;">Well, there is no listing on this homepage.</p>';
-        } else if (location.hash.length <= 65) {
-            location.replace(location.href.replace(location.hash, ''));
+        } else if (!parsedQueryParam.key && !parsedQueryParam.file) {
+            location.replace('./');
         } else {
             // Normal article
-            articleAesKey = location.hash.slice(1, 65);
-            articleFilename = location.hash.slice(65);
             var xhr = new XMLHttpRequest();
             xhr.addEventListener('load', articleContentLoadEventHandler);
-            xhr.open('GET', '/db/' + articleFilename + '.db.txt');
+            xhr.open('GET', './db/' + parsedQueryParam.file + '.db.txt');
             xhr.send();
         };
         window.addEventListener('hashchange', function () {
-            location.reload();
+            // location.reload();
         })
         </script>
     </body>

@@ -69,23 +69,30 @@ let projectBuildingEntry = function () {
 
     // Rewrite default webpage template
     // Maybe need to change this behavior later
-    const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/__SITE_TITLE__/g, config.siteName);
+    const indexPageTemplateDefault = (function (template, vars) {
+        return template.replace(/__[_\w]+__/g, function (word) {
+            return vars[word];
+        });
+    })(fs.readFileSync(__dirname + '/page-template-default.html').toString(), {
+        __SITE_TITLE__: config.siteName,
+        __APP_VER__: pkg.version,
+    });
     fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
     const getExportFilenameForArticle = function (articleFileName_raw) {
-        var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0,32)).digest('hex');
+        var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0, 32)).digest('base64');
         var hash = crypto.createHash('sha256');
-        return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('hex');
+        return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('base64').replace(/\=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     };
     const getDeployedUrlForArticle = function (articleFileName_raw) {
         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
         var articleKey = getKeyForArticle(articleFileName_raw);
-        return config.deploymentTarget + '/#' + articleKey + exportFileName;
+        return config.deploymentTarget + '/?key=' + articleKey + '&file=' + exportFileName;
     };
     const getKeyForArticle = function (articleFileName_raw) {
         var hash = crypto.createHash('sha256');
         hash.update(config.masterKey + 'dASz+r+L1GvOUAKrcy9x5q7lXOL/aD7gRLcczwmXJ0iRUtuFEVkeR/UCkkl8LIU1tDzIhCLbePtYdxO70+ligfNziZ98PimpLU8a3NDWrhRsWL46Jlch8piGFaIVl9xhIts2prYs2oMJrsandWjvcss44O+Qjtxm7ZP8ssx9rmw=' + articleFileName_raw);
-        return hash.digest('hex');
+        return hash.digest('base64').replace(/[+/=]/g, '');
     };
     try {
         var theFullListOfAllArticlesAndTheirDeployedUrls = '';
@@ -169,7 +176,7 @@ let projectBuildingEntry = function () {
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
                         // var exportFileName = base32.encode(hash__articleFileName_raw.digest('hex'));
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
-                        fs.writeFile('html/db/uuid', 'c100cbfe-9192-43bd-a6b8-9972034d920e', function () {});
+                        fs.writeFile('html/db/.gitkeep', 'Hey Git, do not remove empty directories, please!', function () {});
                         fs.writeFile(
                             'html/db/' + exportFileName + '.db.txt',
                             CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
