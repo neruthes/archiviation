@@ -61,6 +61,12 @@
         .content h2 { font-size: 28px; }
         .content h3 { font-size: 24px; }
         .content h4 { font-size: 20px; }
+        .content h1 a { text-decoration: none; }
+        .content h2 a { text-decoration: none; }
+        .content h3 a { text-decoration: none; }
+        .content h4 a { text-decoration: none; }
+        .content h5 a { text-decoration: none; }
+        .content h6 a { text-decoration: none; }
         .content {
             padding: 40px 0;
         }
@@ -198,6 +204,34 @@
         !function(){function t(){var t=0,e=0;this.output="",this.readByte=function(r){return"string"==typeof r&&(r=r.charCodeAt(0)),0>t?e|=r>>-t:e=r<<t&248,t>3?(t-=8,1):(4>t&&(this.output+=i[e>>3],t+=5),0)},this.finish=function(r){var n=this.output+(0>t?i[e>>3]:"")+(r?"$":"");return this.output="",n}}function e(){var t=0,e=0;this.output="",this.readChar=function(r){"string"!=typeof r&&"number"==typeof r&&(r=String.fromCharCode(r)),r=r.toLowerCase();var n=s()[r];"undefined"!=typeof n&&(n<<=3,e|=n>>>t,t+=5,t>=8&&(this.output+=String.fromCharCode(e),t-=8,e=t>0?n<<5-t&255:0))},this.finish=function(e){var r=this.output+(0>t?i[bits>>3]:"")+(e?"$":"");return this.output="",r}}function r(e){var r=new t,n=r.update(e,!0);return n}function n(t){var r=new e,n=r.update(t,!0);return n}function u(t,e){"undefined"==typeof f&&(f=require("crypto"));var n=f.createHash("sha1");if(n.digest=function(t){return function(){return r(t.call(this,"binary"))}}(n.digest),e){if("string"==typeof t||Buffer.isBuffer(t))try{return e(null,u(t))}catch(i){return e(i,null)}return t.on("data",function(t){n.update(t)}),void t.on("end",function(){e(null,n.digest())})}return t?n.update(t).digest():n}var i="0123456789abcdefghjkmnpqrtuvwxyz",o={o:0,i:1,l:1,s:5},s=function(){for(var t={},e=0;e<i.length;e++)t[i[e]]=e;for(var r in o)o.hasOwnProperty(r)&&(t[r]=t[""+o[r]]);return s=function(){return t},t};t.prototype.update=function(t,e){for(var r=0;r<t.length;)r+=this.readByte(t[r]);var n=this.output;return this.output="",e&&(n+=this.finish()),n},e.prototype.update=function(t,e){for(var r=0;r<t.length;r++)this.readChar(t[r]);var n=this.output;return this.output="",e&&(n+=this.finish()),n};var f,a;u.file=function(t,e){return"-"==t?(process.stdin.resume(),u(process.stdin,e)):("undefined"==typeof a&&(a=require("fs")),a.stat(t,function(r,n){return r?e(r,null):n.isDirectory()?e({dir:!0,message:"Is a directory"}):u(require("fs").createReadStream(t),e)}))};var d={Decoder:e,Encoder:t,encode:r,decode:n,sha1:u};"undefined"!=typeof window&&(window.base32=d),"undefined"!=typeof module&&module.exports&&(module.exports=d)}();
         </script>
         <script type="text/javascript">
+        var scrollToElement = function (node) {
+            var _scroll_to_tmp = node.offsetTop-1;
+            (new Array(25)).fill((_scroll_to_tmp-pageYOffset)/25).map(function (x, i) {
+                setTimeout(function () {
+                    scrollBy(0, Math.floor(x));
+                }, i*15);
+            });
+            setTimeout(function () {
+                scrollTo(0, _scroll_to_tmp);
+            }, 25*15);
+        };
+        var trackReadingProgress = function (specifiedElementId) {
+			if (specifiedElementId) {
+				(new Array(20)).fill(1).map(function (x, i) {
+					setTimeout(function () {
+						window.history.replaceState(null, document.title, '#'+specifiedElementId);
+					}, 20);
+				});
+			};
+            var tags = document.querySelectorAll('#js-Article > *');
+            for (var i = 0; i < tags.length; i++) {
+                if (tags[i].offsetTop > pageYOffset) {
+                    console.log('#'+tags[i].id);
+                    window.history.replaceState(null, document.title, '#'+tags[i].id);
+                    return 0;
+                };
+            };
+        };
         var setIdForContentNodes = function () {
             // Modify <h1> <h2> <h3> tags
     		window.tagCount = {};
@@ -223,7 +257,7 @@
 				};
     			node.setAttribute('id', nodeId[tagName]);
     			if (tagName.match(/^h[1-6]$/)) {
-    				node.innerHTML = `<a href="#${nodeId[tagName]}" style="color: inherit;">${node.innerText.trim()}</a>`;
+    				node.innerHTML = `<span data-scroll-to="${nodeId[tagName]}" style="color: inherit;">${node.innerText.trim()}</span>`;
     			};
 
     			// Reset counts of lower ranks
@@ -234,24 +268,22 @@
     			};
     		};
             document.querySelectorAll('#js-Article > *').forEach(headingIdModifier);
+            document.querySelectorAll('#js-Article [data-scroll-to]').forEach(function (node) {
+                node.addEventListener('click', function (e) {
+                    trackReadingProgress(e.target.getAttribute('data-scroll-to'));
+                    scrollToElement(document.querySelector('#'+e.target.getAttribute('data-scroll-to')));
+                });
+            });
 			// Navigate to specified element
 			(function () {
 				setTimeout(function () {
 					if (document.getElementById(location.hash.slice(1))) {
-						window.scrollTo(0, document.querySelector(location.hash).offsetTop-30);
-					}
+						window.scrollTo(0, document.querySelector(location.hash).offsetTop-1);
+					};
 				}, 1);
 			})();
             // Realtime update reading progress
-            window.setInterval(function () {
-                var tags = document.querySelectorAll('#js-Article > *');
-                for (var i = 0; i < tags.length; i++) {
-                    if (tags[i].offsetTop > pageYOffset) {
-                        window.history.replaceState(null, document.title, '#'+tags[i].id);
-                        return 0;
-                    };
-                };
-            }, 1000);
+            window.setInterval(trackReadingProgress, 1000);
         };
         var showAsNotFound = function () {
             document.getElementById('js-ArticleTitle').innerHTML = '404 Not Found';
