@@ -174,7 +174,6 @@ let projectBuildingEntry = function () {
                         var hash__articleFileName_raw = crypto.createHash('sha256');
 
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
-                        // var exportFileName = base32.encode(hash__articleFileName_raw.digest('hex'));
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile('html/db/.gitkeep', 'Hey Git, do not remove empty directories, please!', function () {});
                         fs.writeFile(
