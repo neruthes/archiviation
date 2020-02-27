@@ -236,10 +236,19 @@
 				setTimeout(function () {
 					if (document.getElementById(location.hash.slice(1))) {
 						window.scrollTo(0, document.querySelector(location.hash).offsetTop-30);
-						console.log(document.querySelector(location.hash).offsetTop);
 					}
 				}, 1);
 			})();
+            // Realtime update reading progress
+            window.setInterval(function () {
+                var tags = document.querySelectorAll('#js-Article > *');
+                for (var i = 0; i < tags.length; i++) {
+                    if (tags[i].offsetTop > pageYOffset) {
+                        window.history.pushState(tags[i].id, document.title+' (#'+tags[i].id+')', '#'+tags[i].id)
+                        return 0;
+                    };
+                };
+            }, 1000);
         };
         var showAsNotFound = function () {
             document.getElementById('js-ArticleTitle').innerHTML = '404 Not Found';
