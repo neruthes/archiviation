@@ -218,7 +218,7 @@
     				h6: `H-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}`,
     				p:  `P-a${tagCount.h1}b${tagCount.h2}c${tagCount.h3}d${tagCount.h4}e${tagCount.h5}f${tagCount.h6}p${tagCount.p}`
     			};
-                if (!nodeId) {
+                if (!nodeId[tagName]) {
 					return 1;
 				};
     			node.setAttribute('id', nodeId[tagName]);
@@ -247,7 +247,7 @@
                 var tags = document.querySelectorAll('#js-Article > *');
                 for (var i = 0; i < tags.length; i++) {
                     if (tags[i].offsetTop > pageYOffset) {
-                        window.history.pushState(tags[i].id, document.title+' (#'+tags[i].id+')', '#'+tags[i].id)
+                        window.history.replaceState(null, document.title, '#'+tags[i].id);
                         return 0;
                     };
                 };
@@ -269,6 +269,7 @@
                     articleTitle = articleMetadata.filename;
                     document.getElementById('js-ArticleTitle').innerHTML = articleMetadata.filename;
                     document.title = articleTitle + ' — __SITE_TITLE__';
+                    setTimeout(setIdForContentNodes, 200)
                 } catch (e) {
                     showAsNotFound();
                 } finally {
@@ -282,7 +283,6 @@
                 articleContentText = 'An unkonwn issue occured.';
             };
             document.getElementById('js-Article').innerHTML = articleContentText;
-            setIdForContentNodes();
         };
         if (location.search.length < 4) {
             // Homepage
