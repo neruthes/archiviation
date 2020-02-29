@@ -84,10 +84,13 @@ let projectBuildingEntry = function () {
         var hash = crypto.createHash('sha256');
         return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('base64').replace(/\=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     };
-    const getDeployedUrlForArticle = function (articleFileName_raw) {
+    const getUrlQueryArgsForArticle = function (articleFileName_raw) {
         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
         var articleKey = getKeyForArticle(articleFileName_raw);
-        return config.deploymentTarget + '/?key=' + articleKey + '&file=' + exportFileName;
+        return '?key=' + articleKey + '&file=' + exportFileName;
+    };
+    const getDeployedUrlForArticle = function (articleFileName_raw) {
+        return config.deploymentTarget + '/' + getUrlQueryArgsForArticle(articleFileName_raw);
     };
     const getKeyForArticle = function (articleFileName_raw) {
         var hash = crypto.createHash('sha256');
@@ -153,6 +156,16 @@ let projectBuildingEntry = function () {
                         // Regular text files
                         articleContent_processed = markdown.render(articleContent);
                     };
+
+                    // Template: LINTO
+                    articleContent_processed = articleContent_processed.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
+                        return `<style>.u_d77f62795c78{background:#EEE;} .u_d77f62795c78:hover{background:#CCC;}</style><a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
+                            <span style="font-size: 14px; font-weight: 500; color: #999; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
+                            <span style="font-size: 20px; color: #000; line-height: 24px;">${arg1}</span>
+                        </a>`;
+                    });
+
+                    // Add metadata area
                     articleContent_processed = JSON.stringify({
                         filename: articleFileName_raw
                     }) + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContent_processed;
