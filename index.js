@@ -99,6 +99,7 @@ let projectBuildingEntry = function () {
     };
     try {
         var theFullListOfAllArticlesAndTheirDeployedUrls = '';
+        var theFullListOfAllArticlesAndTheirDeployedUrls_alt = '';
         var articlesDeletedInThisBuild = [];
         var articlesAddedInThisBuild = [];
         var articlesEditedInThisBuild = [];
@@ -135,8 +136,9 @@ let projectBuildingEntry = function () {
             listOfArticles_thisBuild.map(function (articleFileName_raw, iterationCount) {
                 var keyForThisArticle = getKeyForArticle(articleFileName_raw);
 
-                theFullListOfAllArticlesAndTheirDeployedUrls += '[' + articleFileName_raw + ']';
-                theFullListOfAllArticlesAndTheirDeployedUrls += '(' + getDeployedUrlForArticle(articleFileName_raw) + ')\n\n';
+                theFullListOfAllArticlesAndTheirDeployedUrls_alt += `{{LINKTO|${articleFileName_raw}}}\n\n`;
+                theFullListOfAllArticlesAndTheirDeployedUrls += articleFileName_raw + '\n';
+                theFullListOfAllArticlesAndTheirDeployedUrls += getDeployedUrlForArticle(articleFileName_raw) + '\n\n';
 
                 // Load file
                 fs.readFile('source-articles/' + articleFileName_raw, 'utf8', function (err, articleContent) {
@@ -157,7 +159,7 @@ let projectBuildingEntry = function () {
                         articleContent_processed = markdown.render(articleContent);
                     };
 
-                    // Template: LINTO
+                    // Template: LINKTO
                     articleContent_processed = articleContent_processed.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
                         return `<style>.u_d77f62795c78{background:#EEE;} .u_d77f62795c78:hover{background:#CCC;}</style><a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
                             <span style="font-size: 14px; font-weight: 500; color: #999; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
@@ -202,10 +204,10 @@ let projectBuildingEntry = function () {
                         console.log('Project successfully built.');
 
                         // Write the index as an article
-                        fs.writeFile('source-articles/docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
+                        fs.writeFile('source-articles/Archive-Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls_alt, function () {});
 
                         // Write the index into file
-                        fs.writeFile('docs-index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
+                        fs.writeFile('Archive-Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
                         fs.writeFile('.meta/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild), function () {});
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
 
