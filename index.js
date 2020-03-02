@@ -79,10 +79,14 @@ let projectBuildingEntry = function () {
     });
     fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
+    const getKeyForArticle = function (articleFileName_raw) {
+        var key = crypto.createHash('sha256').update(config.masterKey + 'd46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc76|' + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 33);
+        return key;
+    };
     const getExportFilenameForArticle = function (articleFileName_raw) {
         var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0, 32)).digest('base64');
-        var hash = crypto.createHash('sha256');
-        return hash.update('9cfbf34fc443455baf19c27f692ecc76|' + masterSalt + articleFileName_raw).digest('base64').replace(/\=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+        var filename = crypto.createHash('sha256').update('d46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc77|' + masterSalt + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 33);
+        return filename;
     };
     const getUrlQueryArgsForArticle = function (articleFileName_raw) {
         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
@@ -92,11 +96,7 @@ let projectBuildingEntry = function () {
     const getDeployedUrlForArticle = function (articleFileName_raw) {
         return config.deploymentTarget + '/' + getUrlQueryArgsForArticle(articleFileName_raw);
     };
-    const getKeyForArticle = function (articleFileName_raw) {
-        var hash = crypto.createHash('sha256');
-        hash.update(config.masterKey + 'dASz+r+L1GvOUAKrcy9x5q7lXOL/aD7gRLcczwmXJ0iRUtuFEVkeR/UCkkl8LIU1tDzIhCLbePtYdxO70+ligfNziZ98PimpLU8a3NDWrhRsWL46Jlch8piGFaIVl9xhIts2prYs2oMJrsandWjvcss44O+Qjtxm7ZP8ssx9rmw=' + articleFileName_raw);
-        return hash.digest('base64').replace(/[+/=]/g, '');
-    };
+
     try {
         var theFullListOfAllArticlesAndTheirDeployedUrls = '';
         var theFullListOfAllArticlesAndTheirDeployedUrls_alt = '';
