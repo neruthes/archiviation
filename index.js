@@ -157,7 +157,7 @@ let projectBuildingEntry = function () {
                     articleContent_processed = articleContent_processed.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
                         return `<style>.u_d77f62795c78{background:#F5F5F5;} .u_d77f62795c78:hover{background:#E5E5E5;}</style>
                         <a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
-                            <span style="font-size: 14px; font-weight: 500; color: #999; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
+                            <span style="font-size: 14px; font-weight: 500; color: #999; letter-spacing: 0.05em; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
                             <span style="font-size: 20px; color: #000; line-height: 24px;">${arg1}</span>
                         </a>`;
                     });
