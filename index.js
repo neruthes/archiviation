@@ -18,13 +18,6 @@ const program = require('commander');
 const pkg = require('./package.json');
 
 
-
-try {
-
-} catch (e) {
-} finally {
-}
-
 //
 // ---------------------------------------------------------------
 // Command implementations
@@ -80,12 +73,13 @@ let projectBuildingEntry = function () {
     fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
     const getKeyForArticle = function (articleFileName_raw) {
-        var key = crypto.createHash('sha256').update(config.masterKey + 'd46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc76|' + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 33);
+        var key = crypto.createHash('sha256').update(config.masterKey + 'd46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc76|' + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 14);
         return key;
     };
     const getExportFilenameForArticle = function (articleFileName_raw) {
         var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0, 32)).digest('base64');
-        var filename = crypto.createHash('sha256').update('d46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc77|' + masterSalt + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 33);
+        var filename = crypto.createHash('sha256').update('d46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc77|' + masterSalt + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 28);
+        filename += '_' + crypto.createHash('sha256').update('48b4a04ee3115c' + masterSalt.slice(0,5) + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(4, 8);
         return filename;
     };
     const getUrlQueryArgsForArticle = function (articleFileName_raw) {
@@ -161,7 +155,8 @@ let projectBuildingEntry = function () {
 
                     // Template: LINKTO
                     articleContent_processed = articleContent_processed.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
-                        return `<style>.u_d77f62795c78{background:#EEE;} .u_d77f62795c78:hover{background:#CCC;}</style><a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
+                        return `<style>.u_d77f62795c78{background:#F5F5F5;} .u_d77f62795c78:hover{background:#E5E5E5;}</style>
+                        <a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
                             <span style="font-size: 14px; font-weight: 500; color: #999; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
                             <span style="font-size: 20px; color: #000; line-height: 24px;">${arg1}</span>
                         </a>`;
