@@ -73,7 +73,7 @@ let projectBuildingEntry = function () {
     fs.writeFile('html/index.html', indexPageTemplateDefault, function () {});
 
     const getKeyForArticle = function (articleFileName_raw) {
-        var key = crypto.createHash('sha256').update(config.masterKey + 'd46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc76|' + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 14);
+        var key = crypto.createHash('sha256').update(config.masterKey + 'd46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc76|' + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 22);
         return key;
     };
     const getExportFilenameForArticle = function (articleFileName_raw) {
