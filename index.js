@@ -32,7 +32,7 @@ let projectInitializationEntry = function () {
     };
 
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
-    exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
+    exec('touch .gitignore Archive-Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
     fs.writeFileSync('archiviation-config.json', JSON.stringify(config), function () {});
@@ -255,7 +255,7 @@ let projectFixingEntry = function () {
 
 let mkdir_and_touch = function (callback) {
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta;');
-    exec('touch .gitignore docs-index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json;');
+    exec('touch .gitignore Archive-Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json;');
     exec('touch html/.gitkeep; touch html/custom.css; touch html/db/.gitkeep;');
     callback();
 };
