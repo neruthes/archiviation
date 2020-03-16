@@ -35,7 +35,7 @@ let projectInitializationEntry = function () {
     exec('touch .gitignore Archive-Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
-    fs.writeFileSync('archiviation-config.json', JSON.stringify(config), function () {});
+    fs.writeFileSync('archiviation-config.json', JSON.stringify(config, null, '\t'), function () {});
     fs.writeFileSync('.gitignore', 'html/db/*', function () {});
     fs.writeFileSync('html/robots.txt', [
         'User-agent: *',
@@ -48,7 +48,7 @@ let projectInitializationEntry = function () {
     hash.update(fs.readFileSync('source-articles/Example.txt').toString());
     fs.writeFileSync('.meta/last-build-docs-checksums.json', JSON.stringify({
         'Example.txt': hash.digest('hex')
-    }));
+    }, null, '\t'));
 
     const indexPageTemplateDefault = fs.readFileSync(__dirname + '/page-template-default.html').toString().replace(/Yet Another Archive/g, config.siteName);
     fs.writeFileSync('html/index.html', indexPageTemplateDefault);
@@ -100,7 +100,7 @@ let projectBuildingEntry = function () {
         var listOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-list.json').toString());
         var listOfArticles_thisBuild = [];
         var checksumsOfArticles_lastBuild = JSON.parse(fs.readFileSync('.meta/last-build-docs-checksums.json').toString());
-        var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild));
+        var checksumsOfArticles_thisBuild = JSON.parse(JSON.stringify(checksumsOfArticles_lastBuild, null, '\t'));
     } catch (e) {
         projectBuildingEntry();
     } finally {
@@ -165,7 +165,7 @@ let projectBuildingEntry = function () {
                     // Add metadata area
                     articleContent_processed = JSON.stringify({
                         filename: articleFileName_raw
-                    }) + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContent_processed;
+                    }, null, '\t') + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContent_processed;
 
                     if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
                         // New article added to archive
@@ -183,7 +183,7 @@ let projectBuildingEntry = function () {
                     if (isWritingNeeded) {
                         var hash__articleFileName_raw = crypto.createHash('sha256');
 
-                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
+                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild, null, '\t'), function () {});
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile('html/db/.gitkeep', 'Hey Git, do not remove empty directories, please!', function () {});
                         fs.writeFile(
@@ -203,8 +203,8 @@ let projectBuildingEntry = function () {
 
                         // Write the index into file
                         fs.writeFile('Archive-Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
-                        fs.writeFile('.meta/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild), function () {});
-                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild), function () {});
+                        fs.writeFile('.meta/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild, null, '\t'), function () {});
+                        fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild, null, '\t'), function () {});
 
                         // Index change reports
                         if (articlesDeletedInThisBuild.length > 0) {
@@ -317,7 +317,7 @@ program.command('rebuild')
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify({
                             // 'Example.txt': CryptoJS.SHA256(fs.readFileSync('source-articles/Example.txt').toString()).toString()
                             'Example.txt': hash.digest('hex')
-                        }), function () {
+                        }, null, '\t'), function () {
                             projectBuildingEntry();
                         });
                     });
