@@ -299,9 +299,13 @@
             if (e.target.status === 200) {
                 // 200 OK
                 try {
-                    rawArticlePayload = CryptoJS.AES.decrypt(e.target.responseText, parsedQueryParam.key).toString(CryptoJS.enc.Utf8);
-                    articleMetadata = JSON.parse(rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[0]);
-                    articleContentText = rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[1];
+                    rawArticlePayload = e.target.responseText;
+                    articleMetadata = JSON.parse(CryptoJS.AES.decrypt(rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[0], parsedQueryParam.key).toString(CryptoJS.enc.Utf8));
+                    articleContentTextEncrypted_arr = rawArticlePayload.split('\n\n---860c7cfaa67a48e98699777da08c721f---')[1].trim().split('\n');
+                    articleContentText = articleContentTextEncrypted_arr.map(function (sectionEncrypted) {
+                        var cleartext = CryptoJS.AES.decrypt(sectionEncrypted, parsedQueryParam.key).toString(CryptoJS.enc.Utf8);
+                        return cleartext;
+                    }).join('\n\n');
                     articleTitle = articleMetadata.filename;
                     document.getElementById('js-ArticleTitle').innerHTML = articleMetadata.filename;
                     document.title = articleTitle + ' — __SITE_TITLE__';

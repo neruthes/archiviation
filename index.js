@@ -78,7 +78,7 @@ let projectBuildingEntry = function () {
     const getExportFilenameForArticle = function (articleFileName_raw) {
         var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0, 32)).digest('base64');
         var filename = crypto.createHash('sha256').update('d46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc77|' + masterSalt + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 28);
-        filename += '_' + crypto.createHash('sha256').update('48b4a04ee3115c' + masterSalt.slice(0,5) + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(4, 8) + '.db.txt';
+        filename += '_' + crypto.createHash('sha256').update('48b4a04ee3115c' + masterSalt.slice(0,5) + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(4, 8);
         return filename ;
     };
     const getUrlQueryArgsForArticle = function (articleFileName_raw) {
@@ -104,7 +104,7 @@ let projectBuildingEntry = function () {
         projectBuildingEntry();
     } finally {
 
-    }
+    };
     exec('ls -1 source-articles', function (err, stdout, stderr) {
         if (stdout || stdout === '') {
             if (stdout === '') { // `source-articles` is empty
@@ -117,8 +117,8 @@ let projectBuildingEntry = function () {
             listOfArticles_lastBuild.map(function (articleFileName_raw) {
                 if (listOfArticles_thisBuild.indexOf(articleFileName_raw) === -1) {
                     // This article has disappeared in the current build
-                    var filename = getExportFilenameForArticle(articleFileName_raw)
-                    fs.unlink('html/db/' + filename, function () {});
+                    var filename = getExportFilenameForArticle(articleFileName_raw);
+                    fs.unlink('html/db/' + filename + '.db.txt', function () {});
                     articlesDeletedInThisBuild.push(articleFileName_raw);
                 };
             });
@@ -135,35 +135,39 @@ let projectBuildingEntry = function () {
                 // Load file
                 fs.readFile('source-articles/' + articleFileName_raw, 'utf8', function (err, articleContent) {
                     var isWritingNeeded = false;
-                    var hash__articleContent = crypto.createHash('sha256');
-                    hash__articleContent.update(articleContent);
-                    var articleContentChecksum = hash__articleContent.digest('hex');
+                    var articleContentChecksum = crypto.createHash('sha256').update(articleContent).digest('hex');
                     var articleContent_processed = '';
+                    var finalArticlePayload = '';
 
-                    if (articleFileName_raw.match(/\.(png|jpg)$/)) {
-                        // Convert images to Base64
-                        articleContent_processed = '<img src="DATA">'.replace('DATA', base64img.base64Sync('source-articles/' + articleFileName_raw));
-                    } else if (articleFileName_raw.match(/\.(html|htm)$/)) {
-                        // HTML
-                        articleContent_processed = articleContent;
-                    } else {
-                        // Regular text files
-                        articleContent_processed = markdown.render(articleContent);
-                    };
+                    var articleContentSections = articleContent.split('\n\n\n'); // Reduce ciphertext char-per-line to optimze for Git
+                    var articleContentSections_processed = articleContentSections.map(function (rawSectionContent) {
+                        var sectionContent = rawSectionContent.trim();
+                        if (articleFileName_raw.match(/\.(png|jpg)$/)) { // Convert images to Base64
+                            sectionContent = '<img src="DATA">'.replace('DATA', base64img.base64Sync('source-articles/' + articleFileName_raw));
+                        } else if (articleFileName_raw.match(/\.(html|htm)$/)) { // HTML
+                            sectionContent = rawSectionContent;
+                        } else { // Regular text files
+                            sectionContent = markdown.render(rawSectionContent);
+                        };
 
-                    // Template: LINKTO
-                    articleContent_processed = articleContent_processed.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
-                        return `<style>.u_d77f62795c78{background:#F5F5F5;} .u_d77f62795c78:hover{background:#E5E5E5;}</style>
-                        <a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
-                            <span style="font-size: 14px; font-weight: 500; color: #999; letter-spacing: 0.05em; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
-                            <span style="font-size: 20px; color: #000; line-height: 24px;">${arg1}</span>
-                        </a>`;
-                    });
+                        // Template: LINKTO
+                        sectionContent = sectionContent.replace(/\{\{LINKTO\|(.+?)\}\}/g, function (match, arg1) {
+                            return `
+                                <style>.u_d77f62795c78{background:#F5F5F5;} .u_d77f62795c78:hover{background:#E5E5E5;}</style>
+                                <a class="u_d77f62795c78" style="text-decoration: none; border-radius: 6px; display: inline-block; min-width: 300px; padding: 12px 20px 8px; margin: 0 10px 12px 0;" href="${getUrlQueryArgsForArticle(arg1)}">
+                                    <span style="font-size: 14px; font-weight: 500; color: #999; letter-spacing: 0.05em; line-height: 16px; text-transform: uppercase; display: block; padding: 0;">Link to file</span>
+                                    <span style="font-size: 20px; color: #000; line-height: 24px;">${arg1}</span>
+                                </a>
+                            `.trim();
+                        });
+
+                        return CryptoJS.AES.encrypt(sectionContent, keyForThisArticle).toString();
+                    }).join('\n');
 
                     // Add metadata area
-                    articleContent_processed = JSON.stringify({
+                    finalArticlePayload = CryptoJS.AES.encrypt(JSON.stringify({
                         filename: articleFileName_raw
-                    }, null, '\t') + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContent_processed;
+                    }, null, '\t'), keyForThisArticle) + '\n\n---860c7cfaa67a48e98699777da08c721f---\n\n' + articleContentSections_processed;
 
                     if (listOfArticles_lastBuild.indexOf(articleFileName_raw) === -1) {
                         // New article added to archive
@@ -179,14 +183,12 @@ let projectBuildingEntry = function () {
 
                     // Write files
                     if (isWritingNeeded) {
-                        var hash__articleFileName_raw = crypto.createHash('sha256');
-
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild, null, '\t'), function () {});
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile('html/db/.gitkeep', 'Hey Git, do not remove empty directories, please!', function () {});
                         fs.writeFile(
-                            'html/db/' + exportFileName,
-                            CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
+                            'html/db/' + exportFileName + '.db.txt',
+                            finalArticlePayload,
                             function () {}
                         );
                     };
