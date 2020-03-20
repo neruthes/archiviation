@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/neruthes/archiviation#readme",
   "dependencies": {
-    "base32": "0.0.6",
     "base64-img": "^1.0.4",
     "child_process": "*",
     "commander": "*",

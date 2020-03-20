@@ -8,7 +8,6 @@ const crypto = require('crypto');
 
 const CryptoJS = require('crypto-js');
 const markdown = require('markdown-it')();
-const base32 = require('base32');
 const base64img = require('base64-img');
 
 const exec = require('child_process').exec;
@@ -79,8 +78,8 @@ let projectBuildingEntry = function () {
     const getExportFilenameForArticle = function (articleFileName_raw) {
         var masterSalt = crypto.createHash('sha256').update(config.masterKey.slice(0, 32)).digest('base64');
         var filename = crypto.createHash('sha256').update('d46fb93ff24448b4a04ee3115cf5147d|9cfbf34fc443455baf19c27f692ecc77|' + masterSalt + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(0, 28);
-        filename += '_' + crypto.createHash('sha256').update('48b4a04ee3115c' + masterSalt.slice(0,5) + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(4, 8);
-        return filename;
+        filename += '_' + crypto.createHash('sha256').update('48b4a04ee3115c' + masterSalt.slice(0,5) + articleFileName_raw).digest('base64').replace(/[\=\+\/]/g, '').slice(4, 8) + '.db.txt';
+        return filename ;
     };
     const getUrlQueryArgsForArticle = function (articleFileName_raw) {
         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
@@ -118,9 +117,8 @@ let projectBuildingEntry = function () {
             listOfArticles_lastBuild.map(function (articleFileName_raw) {
                 if (listOfArticles_thisBuild.indexOf(articleFileName_raw) === -1) {
                     // This article has disappeared in the current build
-                    var hash = crypto.createHash('sha256');
-                    hash.update(articleFileName_raw);
-                    fs.unlink('html/db/' + base32.encode(hash.digest('hex')), function () {});
+                    var filename = getExportFilenameForArticle(articleFileName_raw)
+                    fs.unlink('html/db/' + filename, function () {});
                     articlesDeletedInThisBuild.push(articleFileName_raw);
                 };
             });
@@ -187,7 +185,7 @@ let projectBuildingEntry = function () {
                         var exportFileName = getExportFilenameForArticle(articleFileName_raw);
                         fs.writeFile('html/db/.gitkeep', 'Hey Git, do not remove empty directories, please!', function () {});
                         fs.writeFile(
-                            'html/db/' + exportFileName + '.db.txt',
+                            'html/db/' + exportFileName,
                             CryptoJS.AES.encrypt(articleContent_processed, keyForThisArticle).toString(),
                             function () {}
                         );
