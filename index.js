@@ -31,7 +31,7 @@ let projectInitializationEntry = function () {
     };
 
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta');
-    exec('touch .gitignore Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
+    exec('touch .gitignore Archive-Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json');
     exec('rm html/db/*;');
 
     fs.writeFileSync('archiviation-config.json', JSON.stringify(config, null, '\t'), function () {});
@@ -199,14 +199,14 @@ let projectBuildingEntry = function () {
                         console.log('Project successfully built.');
 
                         // Write the index as an article
-                        fs.writeFile('source-articles/Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls_alt, function () {});
+                        fs.writeFile('source-articles/Archive-Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls_alt, function () {});
 
                         // Write the index into file
-                        fs.writeFile('Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
+                        fs.writeFile('Archive-Index.txt', theFullListOfAllArticlesAndTheirDeployedUrls, function () {});
                         fs.writeFile('.meta/last-build-docs-list.json', JSON.stringify(listOfArticles_thisBuild, null, '\t'), function () {});
                         fs.writeFile('.meta/last-build-docs-checksums.json', JSON.stringify(checksumsOfArticles_thisBuild, null, '\t'), function () {});
 
-                        // Index change reports
+                        // Archive-Index change reports
                         if (articlesDeletedInThisBuild.length > 0) {
                             if (articlesDeletedInThisBuild.length === 1) {
                                 console.log('\nThe following article is deleted.');
@@ -255,7 +255,7 @@ let projectFixingEntry = function () {
 
 let mkdir_and_touch = function (callback) {
     exec('mkdir source-articles; mkdir html; mkdir html/db; mkdir .meta;');
-    exec('touch .gitignore Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json;');
+    exec('touch .gitignore Archive-Index.txt html/index.html .meta/last-build-docs-list.json .meta/last-build-docs-checksums.json;');
     exec('touch html/.gitkeep; touch html/custom.css; touch html/db/.gitkeep;');
     callback();
 };
