@@ -147,7 +147,7 @@ let projectBuildingEntry = function () {
                         } else if (articleFileName_raw.match(/\.(html|htm)$/)) { // HTML
                             sectionContent = rawSectionContent;
                         } else { // Regular text files
-                            sectionContent = markdown.render(rawSectionContent);
+                            sectionContent = markdown.render(rawSectionContent.replace(/<!--.+-->/g, ''));
                         };
 
                         // Template: LINKTO
