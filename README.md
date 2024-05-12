@@ -1,8 +1,8 @@
-# Archiviation (work-in-progress)
+# Archiviation (archived)
 
 A way to publish text with GitHub Pages without allowing everyone to read.
 
-Note: This software does not have a stable version yet.
+Note: This project is no longer actively maintained due to the emerge of better online private publishing tools such as Vercel and Cloudflare R2.
 
 ## Explain Like You Are A Developer
 
